@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Message = {
     text: string;
@@ -6,21 +6,59 @@ type Message = {
     author: "human" | "ai"
 }
 
+type MessageItemProps = { message: Message; }
+
+function MessageItem({message}: MessageItemProps) {
+
+    const [text, setText] = useState(message.author === "ai" ? "" : message.text);
+
+    useEffect(() => {
+        setTimeout(() => {
+            setText(message.text.slice(0, text.length + 1));
+        }, 50);
+    }, [text, message.text])
+
+    return (
+        <div className="answer">
+            <div className={`author author-${message.author}`}>
+                {message.author}:
+            </div>
+            <div className="message">
+                {text}
+            </div>
+        </div>
+    );
+}
+
 export default function Home() {
     const [prompt, setPrompt] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         setMessages((messages) => {
             return [
                 ...messages,
                 {
                     text: prompt,
-                    id: new Date().toISOString(),
+                    id: new Date().toISOString() + Math.random(),
                     author: "human"
                 }
             ]
         });
+
+        setPrompt("");
+        electron.chatGPTApi.getCompletion(prompt);
+
+        setMessages(messages => 
+            [
+                ...messages,
+                {
+                text: "Here is my super smart answer, can be little bit longer, bla bla bla ...",
+                id: new Date().toISOString() + Math.random(),
+                author: "ai"
+                }
+            ]
+        );
       
     }
 
@@ -40,14 +78,10 @@ export default function Home() {
             </div>
             <div className="answers">
                 { messages.map((message) =>
-                    <div key={message.id} className="answer">
-                        <div className="author author-human">
-                            {message.author}:
-                        </div>
-                        <div className="message">
-                            {message.text}
-                        </div>
-                    </div>
+                    <MessageItem 
+                        key={message.id} 
+                        message={message} 
+                    />
                 )}
             </div>
         </div>
