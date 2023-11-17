@@ -15,7 +15,7 @@ function MessageItem({message}: MessageItemProps) {
     useEffect(() => {
         setTimeout(() => {
             setText(message.text.slice(0, text.length + 1));
-        }, 50);
+        }, 10);
     }, [text, message.text])
 
     return (
@@ -35,6 +35,11 @@ export default function Home() {
     const [messages, setMessages] = useState<Message[]>([]);
 
     const handleSubmit = async () => {
+        if (prompt.trim().length === 0) {
+            return;
+        }
+
+
         setMessages((messages) => {
             return [
                 ...messages,
@@ -47,18 +52,31 @@ export default function Home() {
         });
 
         setPrompt("");
-        electron.chatGPTApi.getCompletion(prompt);
+        const result = await electron.chatGPTApi.getCompletion(prompt);
 
-        setMessages(messages => 
-            [
-                ...messages,
-                {
-                text: "Here is my super smart answer, can be little bit longer, bla bla bla ...",
-                id: new Date().toISOString() + Math.random(),
-                author: "ai"
-                }
-            ]
-        );
+        if (result.error) {
+            setMessages(messages => 
+                [
+                    ...messages,
+                    {
+                        text: result.error,
+                        id: new Date().toISOString() + Math.random(),
+                        author: "ai"
+                    }
+                ]
+            );
+        } else {
+            setMessages(messages => 
+                [
+                    ...messages,
+                    {
+                        text: result.message,
+                        id: new Date().toISOString() + Math.random(),
+                        author: "ai"
+                    }
+                ]
+            );
+        }
       
     }
 

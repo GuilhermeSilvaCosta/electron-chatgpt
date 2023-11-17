@@ -1,6 +1,11 @@
+type AIResponse = {
+    message: string;
+    error?: string;
+  }
+
 type Electron = {
     chatGPTApi: {
-        getCompletion: (value: string) => void;
+        getCompletion: (value: string) => Promise<AIResponse>;
     }
 };
   

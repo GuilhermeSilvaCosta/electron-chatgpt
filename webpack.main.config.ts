@@ -1,4 +1,5 @@
 import type { Configuration } from 'webpack';
+import Dotenv from 'dotenv-webpack';
 
 import { rules } from './webpack.rules';
 
@@ -12,6 +13,9 @@ export const mainConfig: Configuration = {
   module: {
     rules,
   },
+  plugins: [
+    new Dotenv()
+  ],
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
   },
